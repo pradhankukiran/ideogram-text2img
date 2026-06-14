@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.next/
+.vercel/
+node_modules/
+logs/
+out/
+dist/
+build/
+*.log
+*.png
+*.jpg
+*.jpeg
+*.tsbuildinfo
