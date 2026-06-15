@@ -96,10 +96,19 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody)
       });
-      const result = (await response.json()) as GenerateResult;
 
-      if (!response.ok || !result.ok) {
-        const message = !result.ok ? result.error : "Image generation failed.";
+      const text = await response.text();
+      let result: GenerateResult | null = null;
+      try {
+        result = text ? (JSON.parse(text) as GenerateResult) : null;
+      } catch {
+        // Server returned a non-JSON response (e.g. an error page).
+        setError(text || `Server returned ${response.status}.`);
+        return;
+      }
+
+      if (!response.ok || !result || !result.ok) {
+        const message = result && !result.ok ? result.error : "Image generation failed.";
         setError(message);
         return;
       }

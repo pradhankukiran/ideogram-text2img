@@ -83,15 +83,27 @@ export async function POST(request: NextRequest) {
     raise_on_caption_issues: Boolean(payload.raise_on_caption_issues)
   };
 
-  const upstream = await fetch(`${apiBaseUrl}/v1/images/generations`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(upstreamPayload),
-    redirect: "follow"
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${apiBaseUrl}/v1/images/generations`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(upstreamPayload),
+      redirect: "follow"
+    });
+  } catch (err) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not reach image generation API.",
+        details: err instanceof Error ? err.message : String(err)
+      },
+      { status: 502 }
+    );
+  }
 
   const text = await upstream.text();
   let body: unknown;
