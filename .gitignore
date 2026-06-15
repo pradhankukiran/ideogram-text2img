@@ -13,3 +13,4 @@ build/
 *.jpg
 *.jpeg
 *.tsbuildinfo
+!public/favicon.png
