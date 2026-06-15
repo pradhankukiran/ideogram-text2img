@@ -259,13 +259,15 @@ export default function Home() {
         </div>
 
         <div className="imageStage">
-          {imageUrl ? (
+          {isGenerating ? (
+            <div className="skeleton" aria-label="Generating image" />
+          ) : imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={imageUrl} alt="Generated Ideogram output" />
           ) : (
             <div className="emptyState">
-              {isGenerating ? <Loader2 className="spin" size={34} /> : <SlidersHorizontal size={34} />}
-              <span>{isGenerating ? "Generating image" : "Ready"}</span>
+              <SlidersHorizontal size={34} />
+              <span>Ready</span>
             </div>
           )}
         </div>
