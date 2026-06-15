@@ -45,8 +45,7 @@ export default function Home() {
   const [sizePreset, setSizePreset] = useState<SizePreset>("1024x1024");
   const [customSize, setCustomSize] = useState("1024x1024");
   const [samplerPreset, setSamplerPreset] = useState<SamplerPreset>("V4_DEFAULT_20");
-  const [seedEnabled, setSeedEnabled] = useState(true);
-  const [seed, setSeed] = useState(42);
+  const [seed, setSeed] = useState<number | undefined>(undefined);
   const [imageUrl, setImageUrl] = useState("");
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -81,7 +80,7 @@ export default function Home() {
       prompt,
       size,
       sampler_preset: samplerPreset,
-      seed: seedEnabled ? seed : undefined,
+      seed,
       n: 1,
       response_format: "b64_json"
     };
@@ -110,6 +109,7 @@ export default function Home() {
       }
 
       setImageUrl(result.imageDataUrl);
+      setSeed(result.seed);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Image generation failed.");
     } finally {
@@ -122,8 +122,7 @@ export default function Home() {
     setSizePreset("1024x1024");
     setCustomSize("1024x1024");
     setSamplerPreset("V4_DEFAULT_20");
-    setSeedEnabled(true);
-    setSeed(42);
+    setSeed(undefined);
     setError("");
   }
 
@@ -223,24 +222,16 @@ export default function Home() {
             </label>
           </div>
 
-          <label className="toggleRow">
-            <input
-              type="checkbox"
-              checked={seedEnabled}
-              onChange={(event) => setSeedEnabled(event.target.checked)}
-            />
-            <span>Seed</span>
-          </label>
-
-          <label className="field">
-            <span>Seed value</span>
-            <input
-              type="number"
-              value={seed}
-              disabled={!seedEnabled}
-              onChange={(event) => setSeed(Number(event.target.value))}
-            />
-          </label>
+          {seed !== undefined ? (
+            <label className="field">
+              <span>Seed</span>
+              <input
+                type="number"
+                value={seed}
+                onChange={(event) => setSeed(Number(event.target.value))}
+              />
+            </label>
+          ) : null}
 
           <div className="actionRow">
             <button className="secondaryButton" type="button" onClick={reset}>

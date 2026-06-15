@@ -18,10 +18,11 @@ export type IdeogramRequest = {
 export type IdeogramResponse = {
   created: number;
   data: Array<{ b64_json: string }>;
+  seed: number;
 };
 
 export type GenerateResult =
-  | { ok: true; imageDataUrl: string; raw: IdeogramResponse }
+  | { ok: true; imageDataUrl: string; raw: IdeogramResponse; seed: number }
   | { ok: false; error: string; status?: number; details?: unknown };
 
 export function parseSize(size: string): { width: number; height: number } {

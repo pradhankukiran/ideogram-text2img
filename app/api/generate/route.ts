@@ -137,7 +137,8 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     ok: true,
     imageDataUrl: `data:image/png;base64,${b64}`,
-    raw: imageResponse
+    raw: imageResponse,
+    seed: imageResponse.seed
   });
 }
 
