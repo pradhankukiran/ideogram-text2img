@@ -3,7 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "ideogram text2img",
-  description: "Text-to-image interface for the Ideogram Modal API."
+  description: "Text-to-image interface for the Ideogram Modal API.",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icon.svg"
+  }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
