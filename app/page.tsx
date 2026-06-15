@@ -41,15 +41,12 @@ const DEFAULT_MODEL = process.env.NEXT_PUBLIC_IDEOGRAM_MODEL || "ideogram-4-fp8"
 type SizePreset = (typeof SIZE_PRESETS)[number];
 
 export default function Home() {
-  const [prompt, setPrompt] = useState(
-    "a cinematic product photo of a white ceramic mug on a matte gray background, soft studio lighting"
-  );
+  const [prompt, setPrompt] = useState("");
   const [sizePreset, setSizePreset] = useState<SizePreset>("1024x1024");
   const [customSize, setCustomSize] = useState("1024x1024");
   const [samplerPreset, setSamplerPreset] = useState<SamplerPreset>("V4_DEFAULT_20");
   const [seedEnabled, setSeedEnabled] = useState(true);
   const [seed, setSeed] = useState(42);
-  const [raiseOnCaptionIssues, setRaiseOnCaptionIssues] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -86,8 +83,7 @@ export default function Home() {
       sampler_preset: samplerPreset,
       seed: seedEnabled ? seed : undefined,
       n: 1,
-      response_format: "b64_json",
-      raise_on_caption_issues: raiseOnCaptionIssues
+      response_format: "b64_json"
     };
 
     try {
@@ -122,15 +118,12 @@ export default function Home() {
   }
 
   function reset() {
-    setPrompt(
-      "a cinematic product photo of a white ceramic mug on a matte gray background, soft studio lighting"
-    );
+    setPrompt("");
     setSizePreset("1024x1024");
     setCustomSize("1024x1024");
     setSamplerPreset("V4_DEFAULT_20");
     setSeedEnabled(true);
     setSeed(42);
-    setRaiseOnCaptionIssues(false);
     setError("");
   }
 
@@ -247,15 +240,6 @@ export default function Home() {
               disabled={!seedEnabled}
               onChange={(event) => setSeed(Number(event.target.value))}
             />
-          </label>
-
-          <label className="toggleRow">
-            <input
-              type="checkbox"
-              checked={raiseOnCaptionIssues}
-              onChange={(event) => setRaiseOnCaptionIssues(event.target.checked)}
-            />
-            <span>Reject caption issues</span>
           </label>
 
           <div className="actionRow">

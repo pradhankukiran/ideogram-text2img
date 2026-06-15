@@ -13,7 +13,6 @@ export type IdeogramRequest = {
   seed?: number;
   n: number;
   response_format: "b64_json";
-  raise_on_caption_issues: boolean;
 };
 
 export type IdeogramResponse = {

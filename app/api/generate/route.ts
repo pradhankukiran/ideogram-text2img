@@ -79,8 +79,7 @@ export async function POST(request: NextRequest) {
     height,
     sampler_preset: samplerPreset,
     seed: payload.seed,
-    response_format: "b64_json",
-    raise_on_caption_issues: Boolean(payload.raise_on_caption_issues)
+    response_format: "b64_json"
   };
 
   let upstream: Response;
