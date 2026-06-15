@@ -11,7 +11,7 @@ import {
   Send,
   SlidersHorizontal
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   SAMPLER_PRESETS,
   parseSize,
@@ -33,12 +33,27 @@ const SIZE_PRESETS = [
   "custom"
 ] as const;
 
+const EXAMPLE_PROMPTS = [
+  "a cinematic product photo of a white ceramic mug on a matte gray background, soft studio lighting",
+  "an isometric illustration of a tiny city floating in the clouds",
+  "a ginger cat wearing a tiny wizard hat reading a spellbook",
+  "a minimalist logo for a coffee brand, earth tones, flat vector style",
+  "a futuristic neon street in tokyo at night, rain reflections, cyberpunk"
+];
+
 const DEFAULT_ENDPOINT =
   process.env.NEXT_PUBLIC_IDEOGRAM_API_BASE_URL ||
   "https://pradhankukiran--ideogram-4-fp8-api.modal.run";
 const DEFAULT_MODEL = process.env.NEXT_PUBLIC_IDEOGRAM_MODEL || "ideogram-4-fp8";
 
 type SizePreset = (typeof SIZE_PRESETS)[number];
+
+type GenerationMeta = {
+  seed: number;
+  size: string;
+  sampler: SamplerPreset;
+  elapsedMs: number;
+} | null;
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
@@ -50,6 +65,9 @@ export default function Home() {
   const [error, setError] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+  const [meta, setMeta] = useState<GenerationMeta>(null);
+  const promptRef = useRef<HTMLTextAreaElement>(null);
+  const startTimeRef = useRef<number>(0);
 
   const size = sizePreset === "custom" ? customSize : sizePreset;
   const parsedSize = useMemo(() => {
@@ -65,6 +83,24 @@ export default function Home() {
   }, [parsedSize]);
   const canSubmit = Boolean(prompt.trim()) && !sizeError && !isGenerating;
 
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (isGenerating) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isGenerating]);
+
+  useEffect(() => {
+    const el = promptRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [prompt]);
+
   function updateSizePreset(nextSize: SizePreset) {
     setSizePreset(nextSize);
   }
@@ -75,6 +111,7 @@ export default function Home() {
 
     setIsGenerating(true);
     setError("");
+    startTimeRef.current = performance.now();
 
     const requestBody: IdeogramRequest = {
       prompt,
@@ -97,7 +134,6 @@ export default function Home() {
       try {
         result = text ? (JSON.parse(text) as GenerateResult) : null;
       } catch {
-        // Server returned a non-JSON response (e.g. an error page).
         setError(text || `Server returned ${response.status}.`);
         return;
       }
@@ -110,6 +146,12 @@ export default function Home() {
 
       setImageUrl(result.imageDataUrl);
       setSeed(result.seed);
+      setMeta({
+        seed: result.seed,
+        size,
+        sampler: samplerPreset,
+        elapsedMs: Math.round(performance.now() - startTimeRef.current)
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Image generation failed.");
     } finally {
@@ -124,6 +166,7 @@ export default function Home() {
     setSamplerPreset("V4_DEFAULT_20");
     setSeed(undefined);
     setError("");
+    setMeta(null);
   }
 
   async function copyPrompt() {
@@ -139,6 +182,16 @@ export default function Home() {
     link.download = `ideogram-${size}-${Date.now()}.png`;
     link.click();
   }
+
+  function applyExample(example: string) {
+    setPrompt(example);
+    promptRef.current?.focus();
+  }
+
+  const formatElapsed = (ms: number) => {
+    if (ms < 1000) return `${ms}ms`;
+    return `${(ms / 1000).toFixed(1)}s`;
+  };
 
   return (
     <main className="appShell">
@@ -156,10 +209,30 @@ export default function Home() {
 
           <label className="field promptField">
             <span>Prompt</span>
-            <textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} />
+            <textarea
+              ref={promptRef}
+              value={prompt}
+              onChange={(event) => setPrompt(event.target.value)}
+              rows={3}
+            />
           </label>
 
           <div className="inlineToolbar">
+            <select
+              className="exampleSelect"
+              value=""
+              onChange={(event) => applyExample(event.target.value)}
+              aria-label="Example prompts"
+            >
+              <option value="" disabled>
+                Try an example…
+              </option>
+              {EXAMPLE_PROMPTS.map((example) => (
+                <option key={example} value={example}>
+                  {example.length > 60 ? `${example.slice(0, 60)}…` : example}
+                </option>
+              ))}
+            </select>
             <button type="button" onClick={copyPrompt}>
               {copyState === "copied" ? <Check size={16} /> : <Copy size={16} />}
               {copyState === "copied" ? "Copied" : "Copy"}
@@ -271,6 +344,15 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        {meta ? (
+          <div className="metaBox">
+            <span>Seed: {meta.seed}</span>
+            <span>Size: {meta.size}</span>
+            <span>Sampler: {meta.sampler}</span>
+            <span>Time: {formatElapsed(meta.elapsedMs)}</span>
+          </div>
+        ) : null}
 
         {error ? (
           <div className="errorBox" role="alert">

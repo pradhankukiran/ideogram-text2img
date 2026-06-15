@@ -136,6 +136,23 @@ textarea {
   margin-top: -2px;
 }
 
+.inlineToolbar .exampleSelect {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.inlineToolbar .exampleSelect:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(17, 105, 79, 0.13);
+}
+
 .inlineToolbar button,
 .downloadButton,
 .secondaryButton,
@@ -276,6 +293,22 @@ button:disabled {
   color: var(--danger);
   padding: 12px;
   font-size: 14px;
+}
+
+.metaBox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.metaBox span {
+  white-space: nowrap;
 }
 
 .spin {
